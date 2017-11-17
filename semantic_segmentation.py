@@ -1,7 +1,7 @@
 import tensorflow as tf
 import numpy as np
 from input_helper import TextureImages
-rate = 0.001
+rate = 0.003
 EPOCHS = 10
 BATCH_SIZE = 64
 NUM_ITERS = int(2000 / BATCH_SIZE * EPOCHS)
@@ -36,8 +36,12 @@ def SemSeg(input_tensor, is_training):
 	pool2 = tf.layers.max_pooling2d(inputs=conv2, pool_size=[2, 2], strides=2)
 	print("pool2",pool2.shape)
 
+	conv3 = tf.layers.conv2d(inputs=pool2,filters=32,kernel_size=[3, 3],
+						  padding="valid",activation=tf.nn.relu)
+	print("conv3",conv3.shape)
+
 	# Conv transpose (aka deconvolution)
-	conv_logits = tf.layers.conv2d_transpose(inputs=pool2,filters=5,kernel_size=[5, 5],
+	conv_logits = tf.layers.conv2d_transpose(inputs=conv3,filters=5,kernel_size=[8, 8],
 						  strides=5, padding="valid",activation=tf.nn.relu)
 	print("conv_logits",conv_logits.shape)
 
@@ -81,8 +85,8 @@ def run():
 		for start_index in range(0, len(images), eval_batch_size):
 			end_index = start_index + eval_batch_size
 			batch_x = images[start_index: end_index]
-			RealLogits = sess.run(logits, feed_dict={x: batch_x, is_training: False}) 
-			print(RealLogits)
+			#RealLogits = sess.run(logits, feed_dict={x: batch_x, is_training: False}) 
+			#print(RealLogits)
 			batch_predicted_labels = sess.run(prediction, feed_dict={x: batch_x, is_training: False})
 			predicted_labels += list(batch_predicted_labels)
 		predicted_labels = np.vstack(predicted_labels).flatten()
